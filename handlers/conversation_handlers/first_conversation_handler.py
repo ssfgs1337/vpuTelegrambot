@@ -1,5 +1,6 @@
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ConversationHandler, CommandHandler, ContextTypes, MessageHandler, filters
+from telegram.ext import ConversationHandler, CommandHandler, ContextTypes, MessageHandler, filters, \
+    CallbackQueryHandler
 
 from handlers.base_handler import BaseHandler
 
@@ -14,7 +15,7 @@ class FirstConversationHandler(BaseHandler):
             states={
                 GENDER: [MessageHandler(filters.Regex('^(Boy|Girl)$'), cls.gender)],
                 PHOTO: [MessageHandler(filters.PHOTO, cls.photo)],
-                AGE: [MessageHandler(filters.ALL, cls.age)]
+                AGE: [CallbackQueryHandler(cls.age)]
             },
             fallbacks=[CommandHandler('exit', cls.exit)]
         )
@@ -60,14 +61,9 @@ class FirstConversationHandler(BaseHandler):
 
     @staticmethod
     async def age(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.reply_text(f"You are  years old!")
-
-        return ConversationHandler.END
-
-    @staticmethod
-    async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Parses the CallbackQuery and updates the message text."""
         query = update.callback_query
         await query.answer()
 
-        await query.edit_message_text(text=f"Selected option: {query.data}")
+        await query.edit_message_text(text=f"Your age is: {query.data}")
+        return ConversationHandler.END
