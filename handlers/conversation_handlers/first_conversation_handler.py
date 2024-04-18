@@ -40,20 +40,28 @@ class FirstConversationHandler(BaseHandler):
 
     @staticmethod
     async def gender(update: Update, context: ContextTypes.DEFAULT_TYPE):
+        gender = update.message.text # Boy or Girl
+
+        context.user_data["gender"]= gender
         await update.message.reply_text(f'You are a {update.message.text}. Share your photo, please!',reply_markup=ReplyKeyboardRemove())
 
         return PHOTO
 
     @staticmethod
     async def photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
-        await update.message.reply_text(f'Thank you for your photo!')
-        keyboard = [
-            [
-                InlineKeyboardButton("1", callback_data="1"),
-                InlineKeyboardButton("2", callback_data="2"),
-            ],
-            [InlineKeyboardButton("3", callback_data="3")],
-        ]
+        await update.message.reply_text(f"Thank you for your photo! What's your age?")
+
+        keyboard = []
+        number = 1
+
+        for i in range(10):
+            row = []
+
+            for j in range(5):
+                row.append(InlineKeyboardButton(f"{number}", callback_data=f"{number}"))
+                number += 1
+
+            keyboard.append(row)
         reply_markup = InlineKeyboardMarkup(keyboard)
         await update.message.reply_text("Choose your age:", reply_markup=reply_markup)
 
@@ -65,5 +73,9 @@ class FirstConversationHandler(BaseHandler):
         query = update.callback_query
         await query.answer()
 
-        await query.edit_message_text(text=f"Your age is: {query.data}")
+        age = query.data
+        context.user_data["age"] = age
+
+        await query.edit_message_text(text=f"You are a {context.user_data['gender']},You are a {context.user_data['age']}")
+
         return ConversationHandler.END
